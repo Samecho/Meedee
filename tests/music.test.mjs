@@ -24,10 +24,10 @@ test('River Flows in You includes the complete two-hand transcription and ending
   const song = createSong(new context.Midi(readFileSync(metadata.url)), metadata);
   const right = song.notes.filter(note => note.hand === 'right');
   const left = song.notes.filter(note => note.hand === 'left');
-  assert.equal(song.notes.length, 840);
+  assert.equal(song.notes.length, 841);
   assert.equal(song.measures.length, 45);
   assert.ok(Math.abs(song.duration - 166.98325) < .001);
-  assert.equal(right.length, 543);
+  assert.equal(right.length, 544);
   assert.equal(left.length, 297);
   assert.deepEqual(right.slice(0, 8).map(note => note.midi), [81, 80, 81, 80, 81, 76, 81, 74]);
   assert.deepEqual(left.slice(0, 6).map(note => note.midi), [54, 61, 66, 50, 57, 64]);
@@ -39,6 +39,26 @@ test('River Flows in You includes the complete two-hand transcription and ending
   assert.ok(left.some(note => note.midi > 60));
   assert.equal(keyName(song), 'A 大调');
   assert.equal(keyName(song, 2), 'B 大调');
+});
+
+test('River follows the reviewed score passages and maintains the tied chord', () => {
+  const midi = new context.Midi(readFileSync('assets/midi/river-flows-in-you.mid'));
+  const [right, left] = midi.tracks;
+  const at = (track, bar, beat) => Array.from(track.notes).filter(note =>
+    note.ticks === ((bar - 1) * 4 + (bar > 20 ? 1 : 0) + beat) * 480);
+  assert.deepEqual(at(left, 11, 2.5).map(note => note.midi), [57]);
+  assert.deepEqual(at(right, 21, 2.5).map(note => note.midi), [76]);
+  assert.deepEqual(at(right, 30, 2.25).map(note => note.midi), [71]);
+  assert.deepEqual(at(right, 31, 3.25).map(note => note.midi), [81]);
+  assert.deepEqual(at(right, 32, 2.75).map(note => note.midi), [71]);
+  assert.deepEqual(at(left, 38, 1).map(note => note.midi), [69]);
+  assert.deepEqual(at(right, 10, 3).map(note => note.midi).sort((a, b) => a - b), [76, 83]);
+  assert.deepEqual(at(right, 26, 3).map(note => note.midi).sort((a, b) => a - b), [76, 83]);
+  assert.deepEqual(at(right, 42, 3.75).map(note => note.midi), [68]);
+  const tied = at(right, 23, 0);
+  assert.deepEqual(tied.map(note => note.midi).sort((a, b) => a - b), [64, 69]);
+  assert.ok(tied.every(note => note.durationTicks > 480));
+  assert.equal(at(right, 23, 1).length, 0);
 });
 
 test('Galloway Canon contains all 46 measures, both hands and the familiar opening', () => {

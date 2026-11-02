@@ -17,7 +17,7 @@
 
 ## 当前内置版本
 
-**River Flows in You — Yiruma，社区双手钢琴转录**。使用 bestpianocla6 公开分享的完整 MIDI，45 小节，840 个音符，约 2 分 47 秒（界面显示 2:46）。保留原文件全部音符、时值与力度；原有两条钢琴音轨分别对应右手 543 个、左手 297 个音符。打开网站默认选中此曲，《Canon in D》可在「曲目」中切换。
+**River Flows in You — Yiruma，校对过的社区双手钢琴转录**。以 bestpianocla6 公开分享的完整 MIDI 为底稿，参考早期出版谱修正部分音高、补齐几个音符并处理连音。全曲 45 小节、841 个音符，约 2 分 47 秒；左右手分别为 544 和 297 个音符。它并非 Yiruma 的官方 MIDI，也未认证与 2001 年录音逐音相同。打开网站默认选中此曲，《Canon in D》可在「曲目」中切换。
 
 **Canon in D — Lee Galloway 钢琴编曲，社区 MIDI 转录**。使用 SlappingRico 于 2013 年在钢琴瀑布流视频中提供的 MIDI，46 小节，1,031 个音符，约 3 分 01 秒（界面显示已过整秒为 3:00）。保留原文件的速度变化、音符、力度、时值与 CC64 踏板。
 
@@ -41,9 +41,10 @@ npm run dev
 npm test
 npm run check
 node scripts/build-canon.mjs
+node scripts/build-river.mjs
 ```
 
-源 MIDI 和双手分配记录保存在 assets/source/。测试检查所有源音符、速度事件、完整结尾、双手、移调、调速、暂停、跳转、踏板和循环边界。
+源 MIDI 和双手分配记录保存在 assets/source/。测试检查校对过的曲目片段、完整结尾、双手、移调、调速、暂停、跳转、踏板和循环边界。
 
 Web Audio 的同一时钟驱动声音和画面，调速只改变事件时间，移调才改变音高。支持通常的 PPQ MIDI 0/1、变速、变拍号和 CC64；忽略打击乐。导入上限 8 MB、10 万个音符、6 小时；暂不支持 SMPTE 时间格式。
 
