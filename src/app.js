@@ -1,7 +1,7 @@
 import { BUILTIN, assignHands, clamp, createSong, formatTime, keyName, measureAt, noteName } from './music.js';
 import { PianoAudio } from './audio.js';
 import { Transport } from './transport.js';
-import { PianoRoll, drawWaveform } from './roll.js';
+import { PianoRoll } from './roll.js';
 import { readImports, saveImport } from './storage.js';
 
 const $ = id => document.getElementById(id);
@@ -41,8 +41,7 @@ for (const dialog of document.querySelectorAll('dialog')) dialog.addEventListene
 });
 
 function renderLibrary() {
-  $('song-count').textContent = String(songs.length).padStart(2, '0');
-  for (const id of ['song-list', 'mobile-song-list']) {
+  for (const id of ['song-list']) {
     const list = $(id);
     list.replaceChildren();
     for (const [index, song] of songs.entries()) {
@@ -53,7 +52,7 @@ function renderLibrary() {
       const number = document.createElement('span'); number.className = 'song-number'; number.textContent = String(index + 1).padStart(2, '0');
       const copy = document.createElement('span'); copy.className = 'song-card-copy';
       const title = document.createElement('strong'); title.textContent = song.title;
-      const meta = document.createElement('small'); meta.textContent = `${song.id === BUILTIN.id ? 'Pachelbel' : '本地 MIDI'} · ${formatTime(song.duration)}`;
+      const meta = document.createElement('small'); meta.textContent = `${song.arranger || song.composer} · ${formatTime(song.duration)}`;
       copy.append(title, meta); button.append(number, copy);
       button.addEventListener('click', () => { selectSong(song); if ($('library-dialog').open) $('library-dialog').close(); });
       list.append(button);
@@ -66,15 +65,13 @@ function selectSong(song) {
   transport.load(song);
   roll.layout();
   $('song-title').textContent = song.title;
-  $('song-subtitle').textContent = `${song.composer} · ${song.subtitle}`;
-  $('bar-total').textContent = `${song.measures.length} 小节`;
+  $('song-subtitle').textContent = song.arranger || song.composer;
   $('seek').max = song.duration;
   $('total-time').textContent = formatTime(song.duration);
   $('roll-empty').hidden = true;
   $('play-button').disabled = false;
-  document.title = `${song.title} · Meedee 钢琴练习室`;
+  document.title = `${song.title} · Meedee`;
   renderLibrary();
-  drawWaveform($('waveform'), song);
   updateUI();
 }
 
@@ -82,49 +79,31 @@ function updateUI() {
   const song = transport.song;
   if (!song) return;
   const position = transport.getPosition();
-  const countInRemaining = transport.countInRemaining();
-  const currentBar = measureAt(song, position).index;
   $('current-time').textContent = formatTime(position);
   $('seek').value = position;
-  $('seek').setAttribute('aria-valuetext', `${formatTime(position)}，全长 ${formatTime(song.duration)}`);
+  $('seek').setAttribute('aria-valuetext', `${formatTime(position)} / ${formatTime(song.duration)}`);
   $('timeline-progress').style.width = `${position / song.duration * 100}%`;
-  $('measure-counter').textContent = `第 ${currentBar} / ${song.measures.length} 小节`;
-  $('key-label').textContent = keyName(song, transport.transpose);
   $('transpose-label').textContent = keyName(song, transport.transpose);
-  $('transpose-amount').textContent = transport.transpose ? `${transport.transpose > 0 ? '+' : ''}${transport.transpose} 半音` : '原调';
   $('transpose-down').disabled = transport.transpose <= Math.max(-12, -song.minPitch);
   $('transpose-up').disabled = transport.transpose >= Math.min(12, 127 - song.maxPitch);
-  $('transpose-reset').style.visibility = transport.transpose ? 'visible' : 'hidden';
+  $('transpose-reset').disabled = transport.transpose === 0;
   $('speed').value = transport.rate;
   $('speed-label').textContent = `${transport.rate.toFixed(2)}×`;
-  const tempo = song.tempos.filter(t => t.time <= position).at(-1)?.bpm || song.bpm;
-  $('bpm-label').textContent = `${Math.round(tempo * transport.rate)} BPM`;
   $('play-button').classList.toggle('is-playing', transport.playing);
   $('play-icon').querySelector('use').setAttribute('href', transport.playing ? '#i-pause' : '#i-play');
   $('play-button').setAttribute('aria-label', transport.playing ? '暂停' : '播放');
   $('play-text').textContent = transport.playing ? '暂停' : '播放';
-  for (const hand of ['left', 'right']) {
-    const enabled = transport.hands[hand];
-    $(`${hand}-hand`).classList.toggle('selected', enabled);
-    $(`${hand}-hand`).setAttribute('aria-pressed', String(enabled));
-    $(`${hand}-hand`).querySelector('small').textContent = enabled ? '开' : '关';
-  }
-  $('practice-mode').textContent = transport.hands.left && transport.hands.right ? '双手练习' : transport.hands.left ? '左手练习' : transport.hands.right ? '右手练习' : '静音跟练';
-  $('loop-button').setAttribute('aria-pressed', String(transport.loop.enabled));
-  $('loop-button').setAttribute('aria-label', transport.loop.enabled ? '关闭片段循环' : '开启片段循环');
+  $('loop-settings-button').classList.toggle('active', transport.loop.enabled);
+  $('loop-settings-button').title = transport.loop.enabled ? `循环 ${formatTime(transport.loop.start)} — ${formatTime(transport.loop.end)}` : '片段循环';
   $('loop-selection').hidden = !transport.loop.enabled;
   $('loop-selection').style.left = `${transport.loop.start / song.duration * 100}%`;
   $('loop-selection').style.width = `${(transport.loop.end - transport.loop.start) / song.duration * 100}%`;
-  $('loop-summary').textContent = transport.loop.enabled ? `${formatTime(transport.loop.start)} — ${formatTime(transport.loop.end)} · 循环中` : '选择练习片段';
-  $('countdown').hidden = countInRemaining <= 0;
-  if (countInRemaining > 0) $('countdown-number').textContent = String(Math.ceil(countInRemaining));
-  $('session-status').replaceChildren();
-  const dot = document.createElement('span'); dot.className = 'status-dot';
-  $('session-status').append(dot, loadingAudio ? '正在准备钢琴音色…' : transport.playing ? transport.loop.enabled ? '片段循环中，按自己的节奏练习' : '正在练习，按自己的节奏来' : position >= song.duration ? '完整弹完一遍了，再来一次吧' : position > 0 ? '已暂停，随时可以继续' : '准备好，按下播放就开始');
-  $('note-range').textContent = `${noteName(roll.keyboard.min)} — ${noteName(roll.keyboard.max)}`;
+  const remaining = transport.countInRemaining();
+  $('countdown').hidden = remaining <= 0;
+  if (remaining > 0) $('countdown-number').textContent = String(Math.ceil(remaining));
 }
 transport.onchange = () => { roll.invalid = true; updateUI(); };
-transport.onended = () => { updateUI(); toast('这一遍结束了。慢慢来，每一遍都算数。'); };
+transport.onended = updateUI;
 
 async function playPause() {
   if (!transport.song) return;
@@ -136,7 +115,7 @@ async function playPause() {
   $('play-button').setAttribute('aria-busy', 'true');
   updateUI();
   try {
-    await audio.initialize(progress => { $('audio-status').textContent = `准备音色 ${Math.round(progress * 100)}%`; });
+    await audio.initialize();
     if (request !== playRequest || document.hidden) return;
     transport.start(preferences.countIn && transport.position < .05 ? 3 : 0);
     // Screen-awake support must never block the pause button or audio loading state.
@@ -150,7 +129,6 @@ async function playPause() {
     $('play-button').disabled = false;
     $('play-button').classList.remove('is-loading');
     $('play-button').removeAttribute('aria-busy');
-    $('audio-status').textContent = audio.ready ? '原声钢琴' : '点击播放加载音色';
     updateUI();
   }
 }
@@ -167,14 +145,11 @@ globalThis.addEventListener('pointerup', finishScrub);
 globalThis.addEventListener('pointercancel', finishScrub);
 $('seek').addEventListener('change', finishScrub);
 
-for (const hand of ['left', 'right']) $(`${hand}-hand`).addEventListener('click', () => transport.update({ hands: { ...transport.hands, [hand]: !transport.hands[hand] } }));
 function changeSpeed(value) {
   const speed = Math.round(clamp(value, .25, 1.5) * 100) / 100;
   transport.update({ rate: speed }); preferences.speed = speed; savePreferences();
 }
 $('speed').addEventListener('input', event => changeSpeed(Number(event.target.value)));
-$('speed-down').addEventListener('click', () => changeSpeed(transport.rate - .05));
-$('speed-up').addEventListener('click', () => changeSpeed(transport.rate + .05));
 $('volume').value = preferences.volume;
 $('volume').addEventListener('input', event => { preferences.volume = Number(event.target.value); audio.setVolume(preferences.volume); savePreferences(); });
 function transpose(value) {
@@ -222,7 +197,6 @@ $('apply-loop').addEventListener('click', async () => {
   catch (error) { toast(error.message); }
 });
 $('clear-loop').addEventListener('click', () => { transport.setLoop({ ...transport.loop, enabled: false }); $('loop-dialog').close(); });
-$('loop-button').addEventListener('click', () => { if (transport.song) transport.setLoop({ ...transport.loop, enabled: !transport.loop.enabled }); });
 
 $('note-labels').checked = preferences.noteLabels;
 $('count-in').checked = preferences.countIn;
@@ -231,7 +205,6 @@ $('hand-method').value = preferences.handMethod;
 $('split-note').value = preferences.split;
 $('split-row').hidden = preferences.handMethod !== 'pitch';
 $('settings-button').addEventListener('click', () => openDialog('settings-dialog'));
-$('help-button').addEventListener('click', () => openDialog('help-dialog'));
 $('library-button').addEventListener('click', () => openDialog('library-dialog'));
 $('note-labels').addEventListener('change', event => { roll.labels = preferences.noteLabels = event.target.checked; roll.invalid = true; savePreferences(); });
 $('count-in').addEventListener('change', event => { preferences.countIn = event.target.checked; savePreferences(); });
@@ -283,7 +256,7 @@ async function toggleFocus() {
     $('focus-exit')?.remove();
     if (document.fullscreenElement) await document.exitFullscreen();
   }
-  roll.resize(); if (transport.song) drawWaveform($('waveform'), transport.song);
+  roll.resize();
 }
 $('fullscreen-button').addEventListener('click', toggleFocus);
 document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && focusMode) { focusMode = false; document.body.classList.remove('focus-mode'); $('focus-exit')?.remove(); roll.resize(); } });
@@ -295,7 +268,6 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'Escape' && focusMode) toggleFocus();
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { playRequest++; transport.pause(); wakeLock?.release().catch(() => {}); } });
-globalThis.addEventListener('resize', () => { if (transport.song) drawWaveform($('waveform'), transport.song); });
 let lastUI = 0;
 function frame(now) { roll.draw(); if (now - lastUI > 100) { if (transport.playing) updateUI(); lastUI = now; } requestAnimationFrame(frame); }
 requestAnimationFrame(frame);

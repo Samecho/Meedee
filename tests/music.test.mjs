@@ -7,15 +7,30 @@ const context = vm.createContext({});
 vm.runInContext(readFileSync('vendor/Midi.js', 'utf8'), context);
 const readCanon = () => new context.Midi(readFileSync('assets/midi/canon-piano.mid'));
 
-test('Canon contains all 57 measures with separate piano hands and the familiar opening', () => {
+test('Galloway Canon contains all 46 measures, both hands and the familiar opening', () => {
   const midi = readCanon();
   const song = createSong(midi, BUILTIN);
-  assert.equal(song.measures.length, 57);
-  assert.ok(Math.abs(song.duration - 244.2857) < .01);
-  assert.equal(song.notes.filter(n => n.hand === 'right').length, 513);
-  assert.equal(song.notes.filter(n => n.hand === 'left').length, 450);
+  assert.equal(song.measures.length, 46);
+  assert.ok(Math.abs(song.duration - 180.8241) < .01);
+  assert.equal(song.notes.filter(n => n.hand === 'right').length, 511);
+  assert.equal(song.notes.filter(n => n.hand === 'left').length, 520);
   assert.deepEqual(song.notes.filter(n => n.hand === 'right').slice(0, 8).map(n => n.midi), [78, 76, 74, 73, 71, 69, 71, 73]);
   assert.equal(midi.header.keySignatures[0].key, 'D');
+});
+test('The full source transcription is preserved, including every pitch, duration and velocity', () => {
+  const source = new context.Midi(readFileSync('assets/source/canon-galloway-community.mid'));
+  const output = readCanon();
+  const events = midi => midi.tracks.flatMap(t => t.notes.map(n => [n.midi, n.ticks, n.durationTicks, n.velocity].join(':'))).sort();
+  assert.deepEqual(events(output), events(source));
+  assert.equal(output.header.tempos.length, source.header.tempos.length);
+  source.header.tempos.forEach((tempo, index) => {
+    assert.equal(output.header.tempos[index].ticks, tempo.ticks);
+    assert.ok(Math.abs(output.header.tempos[index].bpm - tempo.bpm) < .001);
+  });
+});
+test('The rising left-hand accompaniment stays blue even above middle C', () => {
+  const song = createSong(readCanon(), BUILTIN);
+  assert.deepEqual(song.notes.filter(n => n.hand === 'left').slice(0, 8).map(n => n.midi), [50, 57, 62, 66, 45, 52, 57, 61]);
 });
 test('Original hand labels survive crossing middle C; optional pitch split is explicit', () => {
   const song = createSong(readCanon(), BUILTIN);
@@ -36,8 +51,8 @@ test('Transposing D major to C or E updates the label without modifying source p
 test('Measure boundaries include the selected final bar and use musical time', () => {
   const song = createSong(readCanon(), BUILTIN);
   assert.equal(measureAt(song, song.measures[4].time).index, 5);
-  assert.equal(measureAt(song, song.duration).index, 57);
-  assert.ok(Math.abs(song.measures[3].end - 240 / 56 * 4) < .001);
+  assert.equal(measureAt(song, song.duration).index, 46);
+  assert.ok(Math.abs(song.measures[3].end - 16) < .001);
 });
 test('Black piano keys align with the gap between white keys', () => {
   const layout = pianoLayout(700, 60, 71);

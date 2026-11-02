@@ -1,8 +1,8 @@
-export const HAND_COLORS = { left: '#91d5bd', right: '#e9b998' };
+export const HAND_COLORS = { left: '#88b5dc', right: '#dcb18b' };
 export const BUILTIN = {
   id: 'canon-in-d', title: 'Canon in D', composer: 'Johann Pachelbel',
-  subtitle: '完整钢琴编曲 · Noctave 版', key: 2, scale: 'major',
-  url: './assets/midi/canon-piano.mid', endBeats: 228,
+  arranger: 'Lee Galloway', subtitle: 'Lee Galloway · 社区 MIDI 转录', key: 2, scale: 'major',
+  url: './assets/midi/canon-piano.mid',
 };
 
 export const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -116,7 +116,7 @@ export function createSong(midi, metadata = {}) {
   const key = midi.header.keySignatures?.[0];
   const keyMap = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11, Cb: 11 };
   const song = { id: metadata.id || `import-${Date.now()}`, title: metadata.title || midi.name || '未命名的曲子',
-    composer: metadata.composer || '我的 MIDI', subtitle: metadata.subtitle || '本地导入',
+    composer: metadata.composer || '我的 MIDI', arranger: metadata.arranger, subtitle: metadata.subtitle || '本地导入',
     key: metadata.key ?? keyMap[key?.key], scale: metadata.scale || key?.scale || 'major',
     notes, duration, bpm: midi.header.tempos[0]?.bpm || 120,
     tempos: midi.header.tempos.map(t => ({ time: t.time, bpm: t.bpm })),
