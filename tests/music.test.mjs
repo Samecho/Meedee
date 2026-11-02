@@ -2,10 +2,44 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
-import { BUILTIN, assignHands, createSong, keyName, loopSegments, measureAt, pianoLayout } from '../src/music.js';
+import { BUILTINS, assignHands, createSong, keyName, loopSegments, measureAt, pianoLayout } from '../src/music.js';
 const context = vm.createContext({});
 vm.runInContext(readFileSync('vendor/Midi.js', 'utf8'), context);
+const BUILTIN = BUILTINS.find(song => song.id === 'canon-in-d');
 const readCanon = () => new context.Midi(readFileSync('assets/midi/canon-piano.mid'));
+
+test('The built-in library has distinct playable songs with River first', () => {
+  assert.equal(BUILTINS[0].id, 'river-flows-in-you');
+  assert.equal(new Set(BUILTINS.map(song => song.id)).size, BUILTINS.length);
+  for (const metadata of BUILTINS) {
+    const song = createSong(new context.Midi(readFileSync(metadata.url)), metadata);
+    assert.ok(song.notes.some(note => note.hand === 'left'));
+    assert.ok(song.notes.some(note => note.hand === 'right'));
+    assert.ok(song.duration > 120);
+  }
+});
+
+test('River Flows in You includes the complete two-hand transcription and ending', () => {
+  const metadata = BUILTINS.find(song => song.id === 'river-flows-in-you');
+  const song = createSong(new context.Midi(readFileSync(metadata.url)), metadata);
+  const right = song.notes.filter(note => note.hand === 'right');
+  const left = song.notes.filter(note => note.hand === 'left');
+  assert.equal(song.notes.length, 840);
+  assert.equal(song.measures.length, 45);
+  assert.ok(Math.abs(song.duration - 166.98325) < .001);
+  assert.equal(right.length, 543);
+  assert.equal(left.length, 297);
+  assert.deepEqual(right.slice(0, 8).map(note => note.midi), [81, 80, 81, 80, 81, 76, 81, 74]);
+  assert.deepEqual(left.slice(0, 6).map(note => note.midi), [54, 61, 66, 50, 57, 64]);
+  assert.equal(right.at(-1).midi, 81);
+  assert.equal(left.at(-1).midi, 61);
+  assert.ok(right.at(-1).end > 166);
+  assert.ok(left.at(-1).end > 166);
+  assert.ok(right.some(note => note.midi < 60));
+  assert.ok(left.some(note => note.midi > 60));
+  assert.equal(keyName(song), 'A 大调');
+  assert.equal(keyName(song, 2), 'B 大调');
+});
 
 test('Galloway Canon contains all 46 measures, both hands and the familiar opening', () => {
   const midi = readCanon();

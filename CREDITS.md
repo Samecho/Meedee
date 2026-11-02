@@ -1,5 +1,12 @@
 # Sources and attribution
 
+## River Flows in You
+
+- Composition: **Yiruma**. Composition and transcription rights remain with their respective owners and are not covered by the application's MIT licence.
+- Community MIDI shared publicly by **bestpianocla6** on 2024-02-02: https://www.patreon.com/bestpianocla6/posts/midi-river-flows-97703177 . The post provides the file used in the creator's piano video; it is not an official MIDI release by Yiruma.
+- Public attachment: https://www.patreon.com/file?h=97703177&m=273392661 . Retrieved 2026-11-02; the unmodified 5,625-byte file is bundled at assets/midi/river-flows-in-you.mid. SHA-256: 2f654f6bb54328bc923f722e0aafdceb7b8374406bde549f5c953a247d4aa117.
+- All source notes, timing, velocity and MIDI events are retained: 840 notes, 45 measures, approximately 167 seconds at the source's 65 BPM. The source contains two piano tracks; the higher track is right hand (543 notes) and the lower track is left hand (297 notes). Track membership preserves hand colours when either hand crosses middle C.
+
 ## Current Canon in D
 
 - Composition: Johann Pachelbel (1653–1706).

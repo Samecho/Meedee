@@ -1,9 +1,16 @@
 export const HAND_COLORS = { left: '#88b5dc', right: '#dcb18b' };
-export const BUILTIN = {
-  id: 'canon-in-d', title: 'Canon in D', composer: 'Johann Pachelbel',
-  arranger: 'Lee Galloway', subtitle: 'Lee Galloway · 社区 MIDI 转录', key: 2, scale: 'major',
-  url: './assets/midi/canon-piano.mid',
-};
+export const BUILTINS = [
+  {
+    id: 'river-flows-in-you', title: 'River Flows in You', composer: 'Yiruma',
+    subtitle: 'Yiruma · 社区 MIDI 转录', key: 9, scale: 'major',
+    url: './assets/midi/river-flows-in-you.mid',
+  },
+  {
+    id: 'canon-in-d', title: 'Canon in D', composer: 'Johann Pachelbel',
+    arranger: 'Lee Galloway', subtitle: 'Lee Galloway · 社区 MIDI 转录', key: 2, scale: 'major',
+    url: './assets/midi/canon-piano.mid',
+  },
+];
 
 export const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 export function formatTime(seconds) {

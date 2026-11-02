@@ -1,4 +1,4 @@
-import { BUILTIN, assignHands, clamp, createSong, formatTime, keyName, measureAt, noteName } from './music.js';
+import { BUILTINS, assignHands, clamp, createSong, formatTime, keyName, measureAt, noteName } from './music.js';
 import { PianoAudio } from './audio.js';
 import { Transport } from './transport.js';
 import { PianoRoll } from './roll.js';
@@ -274,10 +274,15 @@ requestAnimationFrame(frame);
 
 async function boot() {
   try {
-    const response = await fetch(BUILTIN.url);
-    if (!response.ok) throw new Error('曲目暂时无法载入，请刷新重试');
-    const song = createSong(new globalThis.Midi(await response.arrayBuffer()), BUILTIN);
-    songs.push(song); selectSong(song);
+    const results = await Promise.allSettled(BUILTINS.map(async metadata => {
+      const response = await fetch(metadata.url);
+      if (!response.ok) throw new Error('曲目暂时无法载入，请刷新重试');
+      return createSong(new globalThis.Midi(await response.arrayBuffer()), metadata);
+    }));
+    for (const result of results) if (result.status === 'fulfilled') songs.push(result.value);
+    if (!songs.length) throw new Error('曲目暂时无法载入，请刷新重试');
+    selectSong(songs[0]);
+    if (results.some(result => result.status === 'rejected')) toast('部分曲目暂时无法载入，请刷新重试');
   } catch (error) { $('roll-empty').textContent = error.message || '练习室暂时无法打开，请刷新重试'; toast(error.message); }
   try {
     for (const saved of await readImports()) {
