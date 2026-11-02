@@ -3,13 +3,15 @@ import { PianoAudio } from './audio.js';
 import { Transport } from './transport.js';
 import { PianoRoll } from './roll.js';
 import { readImports, saveImport } from './storage.js';
+import { bindPinchZoom, MAX_ZOOM, MIN_ZOOM, normalizeZoom } from './zoom.js';
 
 const $ = id => document.getElementById(id);
-const preferences = { noteLabels: true, countIn: true, lookahead: 12, handMethod: 'auto', split: 60, volume: .75, speed: 1 };
+const preferences = { noteLabels: true, countIn: true, zoom: 1, handMethod: 'auto', split: 60, volume: .75, speed: 1 };
 try {
   const saved = JSON.parse(localStorage.getItem('meedee-preferences') || '{}');
   for (const key of ['noteLabels', 'countIn']) if (typeof saved[key] === 'boolean') preferences[key] = saved[key];
-  if ([6, 9, 12, 16].includes(saved.lookahead)) preferences.lookahead = saved.lookahead;
+  if (Number.isFinite(saved.zoom)) preferences.zoom = normalizeZoom(saved.zoom);
+  else if ([6, 9, 12, 16].includes(saved.lookahead)) preferences.zoom = normalizeZoom(12 / saved.lookahead);
   if (['auto', 'pitch'].includes(saved.handMethod)) preferences.handMethod = saved.handMethod;
   if ([48, 55, 60, 65, 72].includes(saved.split)) preferences.split = saved.split;
   if (Number.isFinite(saved.volume)) preferences.volume = clamp(saved.volume, 0, 1);
@@ -23,7 +25,7 @@ export const songs = [];
 transport.rate = preferences.speed;
 audio.setVolume(preferences.volume);
 roll.labels = preferences.noteLabels;
-roll.lookahead = preferences.lookahead;
+roll.setZoom(preferences.zoom);
 let playRequest = 0, loadingAudio = false, draftLoop = null, draftBarEdits = false, toastTimer, wakeLock;
 
 function toast(message) {
@@ -150,6 +152,22 @@ function changeSpeed(value) {
   transport.update({ rate: speed }); preferences.speed = speed; savePreferences();
 }
 $('speed').addEventListener('input', event => changeSpeed(Number(event.target.value)));
+function updateZoomUI() {
+  $('zoom-label').textContent = `${Math.round(roll.zoom * 100)}%`;
+  $('zoom-out').disabled = roll.zoom <= MIN_ZOOM;
+  $('zoom-in').disabled = roll.zoom >= MAX_ZOOM;
+}
+function changeZoom(value, persist = true) {
+  preferences.zoom = normalizeZoom(value);
+  roll.setZoom(preferences.zoom);
+  roll.draw(true);
+  updateZoomUI();
+  if (persist) savePreferences();
+}
+$('zoom-out').addEventListener('click', () => changeZoom(roll.zoom - .25));
+$('zoom-in').addEventListener('click', () => changeZoom(roll.zoom + .25));
+bindPinchZoom($('piano-roll'), () => roll.zoom, value => changeZoom(value, false), savePreferences);
+updateZoomUI();
 $('volume').value = preferences.volume;
 $('volume').addEventListener('input', event => { preferences.volume = Number(event.target.value); audio.setVolume(preferences.volume); savePreferences(); });
 function transpose(value) {
@@ -200,7 +218,6 @@ $('clear-loop').addEventListener('click', () => { transport.setLoop({ ...transpo
 
 $('note-labels').checked = preferences.noteLabels;
 $('count-in').checked = preferences.countIn;
-$('lookahead').value = preferences.lookahead;
 $('hand-method').value = preferences.handMethod;
 $('split-note').value = preferences.split;
 $('split-row').hidden = preferences.handMethod !== 'pitch';
@@ -208,7 +225,6 @@ $('settings-button').addEventListener('click', () => openDialog('settings-dialog
 $('library-button').addEventListener('click', () => openDialog('library-dialog'));
 $('note-labels').addEventListener('change', event => { roll.labels = preferences.noteLabels = event.target.checked; roll.invalid = true; savePreferences(); });
 $('count-in').addEventListener('change', event => { preferences.countIn = event.target.checked; savePreferences(); });
-$('lookahead').addEventListener('change', event => { roll.lookahead = preferences.lookahead = Number(event.target.value); roll.invalid = true; savePreferences(); });
 function reassignHands() {
   if (!transport.song) return;
   const wasPlaying = transport.playing;

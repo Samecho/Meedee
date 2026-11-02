@@ -30,6 +30,8 @@
     <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 3 4 3 4v15s5-2 9 1c4-3 9-1 9-1V4s-5-2-9 1v15"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
     <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+    <symbol id="i-zoom-in" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5.5 5.5M7 10h6m-3-3v6"/></symbol>
+    <symbol id="i-zoom-out" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 5.5 5.5M7 10h6"/></symbol>
   </defs></svg>
 
 
@@ -58,6 +60,7 @@
             <button class="icon-button" id="forward-button" aria-label="前进 5 秒" title="前进 5 秒"><svg><use href="#i-forward"/></svg></button>
             <button class="icon-button loop-settings-button" id="loop-settings-button" aria-label="片段循环" title="片段循环"><svg><use href="#i-loop"/></svg></button>
           </div>
+          <div class="zoom-control" role="group" aria-label="音符缩放"><button id="zoom-out" class="icon-button" aria-label="缩小音符" title="缩小音符"><svg><use href="#i-zoom-out"/></svg></button><output id="zoom-label" aria-label="音符缩放比例" title="在音符画面上双指捏合也可缩放">100%</output><button id="zoom-in" class="icon-button" aria-label="放大音符" title="放大音符"><svg><use href="#i-zoom-in"/></svg></button></div>
           <label class="speed-control"><span>速度</span><input id="speed" type="range" min="0.25" max="1.5" step="0.05" value="1" aria-label="播放速度"><output id="speed-label">1.00×</output></label>
           <div class="transpose-control"><button id="transpose-down" class="small-step" aria-label="降低一个半音">−</button><output id="transpose-label" aria-label="当前调性">D 大调</output><button id="transpose-up" class="small-step" aria-label="升高一个半音">＋</button></div>
         </div>
@@ -77,7 +80,6 @@
     <label class="setting-row"><span>音量</span><input id="volume" type="range" min="0" max="1" step="0.01" value="0.75" aria-label="音量"></label>
     <label class="setting-row"><span>显示音名</span><input id="note-labels" type="checkbox" checked></label>
     <label class="setting-row"><span>从头播放时预备 3 秒</span><input id="count-in" type="checkbox" checked></label>
-    <label class="setting-row"><span>预览长度</span><select id="lookahead"><option value="6">6 秒</option><option value="9">9 秒</option><option value="12">12 秒</option><option value="16">16 秒</option></select></label>
     <div class="setting-row"><span>键盘范围</span><button id="range-button" class="outline-button" aria-label="切换到完整 88 键键盘">适配曲目</button></div>
     <label class="setting-row"><span>左右手分配<small id="hand-method-note">按 MIDI 声部分配颜色</small></span><select id="hand-method"><option value="auto">跟随声部</option><option value="pitch">按音高分手</option></select></label>
     <label class="setting-row" id="split-row" hidden><span>分界音</span><select id="split-note"><option value="48">C3</option><option value="55">G3</option><option value="60">C4</option><option value="65">F4</option><option value="72">C5</option></select></label>

@@ -27,7 +27,7 @@ h1 { margin:0; font-size:18px; line-height:1.4; font-weight:500; overflow-wrap:a
 .practice { flex:1; min-height:0; min-width:0; display:flex; flex-direction:column; padding:0 16px; }
 .roll-panel { flex:1; min-height:160px; min-width:0; background:#1a1a1a; }
 .canvas-wrap { position:relative; width:100%; height:100%; min-height:160px; overflow:hidden; }
-#piano-roll { position:absolute; inset:0; display:block; width:100%; height:100%; }
+#piano-roll { position:absolute; inset:0; display:block; width:100%; height:100%; touch-action:none; }
 .roll-empty { position:absolute; left:50%; top:45%; transform:translate(-50%,-50%); color:#aaa; font-size:14px; }
 .countdown { position:absolute; left:50%; top:43%; transform:translate(-50%,-50%); pointer-events:none; color:#eee; font-size:44px; line-height:1; background:#252525; padding:15px 23px; border:1px solid #555; border-radius:7px; }
 .player { flex-shrink:0; padding:14px 2px 12px; }
@@ -54,6 +54,8 @@ h1 { margin:0; font-size:18px; line-height:1.4; font-weight:500; overflow-wrap:a
 .play-button.is-playing svg { fill:none; stroke-width:3; }
 .play-button.is-loading { opacity:.5; }
 .loop-settings-button.active { background:#404040; color:#f0f0f0; }
+.zoom-control { display:flex; align-items:center; gap:2px; }
+.zoom-control output { min-width:43px; text-align:center; color:#b4b4b4; font:12px Consolas,ui-monospace,monospace; }
 .speed-control { flex:1; min-width:180px; max-width:260px; display:flex; align-items:center; gap:12px; color:#b4b4b4; font-size:12px; }
 .speed-control>span { white-space:nowrap; }
 .speed-control input { width:100%; min-width:50px; }

@@ -1,4 +1,5 @@
 import { HAND_COLORS, pianoLayout, noteName, lowerBound, clamp } from './music.js';
+import { normalizeZoom, rollMetrics } from './zoom.js';
 
 export class PianoRoll {
   constructor(canvas, transport) {
@@ -6,7 +7,7 @@ export class PianoRoll {
     this.ctx = canvas.getContext('2d', { alpha: false });
     this.transport = transport;
     this.labels = true;
-    this.lookahead = 12;
+    this.zoom = 1;
     this.fullRange = false;
     this.width = 0;
     this.height = 0;
@@ -35,9 +36,12 @@ export class PianoRoll {
       max = clamp(Math.ceil((song.maxPitch + transpose + 2) / 12) * 12, min + 12, 127);
     }
     this.keyboard = pianoLayout(this.width, min, max);
-    this.keyHeight = clamp(this.height * .255, 64, 112);
-    this.hitY = this.height - this.keyHeight;
+    Object.assign(this, rollMetrics(this.height, this.zoom));
     this.invalid = true;
+  }
+  setZoom(value) {
+    this.zoom = normalizeZoom(value);
+    this.layout();
   }
   draw(force = false) {
     const transport = this.transport;
@@ -48,7 +52,7 @@ export class PianoRoll {
     const position = transport.getPosition(true);
     const song = transport.song;
     const preparing = transport.countInRemaining() > 0;
-    const px = hitY / this.lookahead;
+    const px = this.pixelsPerSecond;
     ctx.fillStyle = '#1a1a1a';
     ctx.fillRect(0, 0, width, height);
     if (!song) return;
