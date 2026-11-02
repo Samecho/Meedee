@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#111a1a">
+  <meta name="description" content="把一首喜欢的曲子，慢慢弹会。为 iPad 准备的 MIDI 钢琴练习室。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Meedee · 你的钢琴练习室</title>
+  <link rel="icon" href="./assets/icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="stylesheet" href="./style.css">
+  <script src="./vendor/Midi.js" defer></script>
+  <script src="./src/app.js" type="module"></script>
+</head>
+<body>
+  <svg class="icon-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-piano" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16m6-16v16M7 4v8m6-8v8m6-8v8"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 5 11 7-11 7z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24"><path d="m11 6-6 6 6 6m7-12-6 6 6 6"/></symbol>
+    <symbol id="i-forward" viewBox="0 0 24 24"><path d="m6 6 6 6-6 6m7-12 6 6-6 6"/></symbol>
+    <symbol id="i-restart" viewBox="0 0 24 24"><path d="M4 4v6h6M5 9a8 8 0 1 1-1 7"/></symbol>
+    <symbol id="i-loop" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4M3 11V8a2 2 0 0 1 2-2h16M7 22l-4-4 4-4m14-3v5a2 2 0 0 1-2 2H3"/></symbol>
+    <symbol id="i-import" viewBox="0 0 24 24"><path d="M12 15V3m-4 4 4-4 4 4M4 14v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"/></symbol>
+    <symbol id="i-fullscreen" viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m8 0h5v-5"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6m6 4v6"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 4 6 8H3v8h3l5 4zM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 5C8 2 3 4 3 4v15s5-2 9 1c4-3 9-1 9-1V4s-5-2-9 1v15"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  </defs></svg>
+  <header class="app-header">
+    <a class="brand" href="./" aria-label="Meedee 首页"><span class="brand-mark"><svg><use href="#i-piano"/></svg></span><span>meedee<span class="brand-dot">.</span></span></a>
+    <div class="header-center"><span class="nav-active">钢琴练习室</span><span class="header-divider"></span><span class="quiet-text">one note at a time</span></div>
+    <div class="header-actions"><span class="sound-status"><span class="status-dot"></span><span id="audio-status">原声钢琴</span></span><button class="icon-button" id="help-button" aria-label="使用说明" title="使用说明"><svg><use href="#i-book"/></svg></button><button class="icon-button" id="settings-button" aria-label="练习设置" title="练习设置"><svg><use href="#i-settings"/></svg></button><button class="icon-button" id="fullscreen-button" aria-label="进入专注模式" title="专注模式"><svg><use href="#i-fullscreen"/></svg></button></div>
+  </header>
+  <div class="workspace">
+    <aside class="library" id="library">
+      <div class="library-heading"><span class="eyebrow">YOUR COLLECTION</span><h2>我的曲库 <span id="song-count">01</span></h2></div>
+      <div id="song-list" class="song-list"></div>
+      <button class="import-button" data-import><svg><use href="#i-import"/></svg>导入 MIDI<span>＋</span></button>
+      <p class="library-caption">把喜欢的音乐，变成会弹的音乐。</p>
+      <div class="sidebar-bottom"><div class="tiny-keyboard" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><p>慢一点，<br>也在靠近喜欢的旋律。</p><span>JUST YOU & THE PIANO</span></div>
+    </aside>
+    <main class="practice">
+      <section class="song-heading" aria-label="当前曲目">
+        <div class="song-title-wrap"><div class="eyebrow song-eyebrow"><span class="little-line"></span> NOW PRACTICING</div><h1 id="song-title">Canon in D</h1><p id="song-subtitle">Johann Pachelbel <span>·</span> 完整钢琴编曲</p></div>
+        <div class="song-meta"><span id="key-label">D 大调</span><span class="meta-divider"></span><span id="bar-total">57 小节</span><button class="mobile-library-button subtle-button" id="library-button"><svg><use href="#i-book"/></svg>曲库</button></div>
+      </section>
+      <section class="roll-panel" aria-label="钢琴瀑布流">
+        <div class="roll-toolbar"><div class="view-title"><span class="view-dot"></span>瀑布流<span class="roll-divider">/</span><span id="practice-mode">双手练习</span></div><div class="roll-options"><span class="measure-counter" id="measure-counter">第 1 / 57 小节</span><button class="range-button" id="range-button" aria-label="切换到完整 88 键键盘">适配曲目 <span>⌄</span></button></div></div>
+        <div class="canvas-wrap" id="canvas-wrap"><canvas id="piano-roll" aria-label="音符下落至琴键时弹奏；左手绿色，右手杏色"></canvas><div class="roll-empty" id="roll-empty">正在打开练习室…</div><div class="countdown" id="countdown" hidden><span id="countdown-number">3</span><small>准备好，慢慢来</small></div></div>
+        <div class="roll-caption"><span><i class="hand-dot left-dot"></i>左手 <i class="hand-dot right-dot"></i>右手</span><span id="roll-hint">音符到达亮线时，弹下对应的琴键</span><span id="note-range">C2 — C7</span></div>
+      </section>
+      <section class="player" aria-label="播放与练习控制">
+        <div class="timeline-row"><output id="current-time">0:00</output><div class="timeline-wrap" id="timeline-wrap"><canvas id="waveform" aria-hidden="true"></canvas><div class="timeline-progress" id="timeline-progress"></div><div class="loop-selection" id="loop-selection" hidden><span>A</span><span>B</span></div><input id="seek" type="range" min="0" max="244" value="0" step="0.01" aria-label="播放进度"></div><output id="total-time">4:04</output></div>
+        <div class="playback-row"><div class="hand-toggles"><button id="left-hand" class="hand-toggle left selected" aria-pressed="true"><i class="hand-dot left-dot"></i>左手<small>开</small></button><button id="right-hand" class="hand-toggle right selected" aria-pressed="true"><i class="hand-dot right-dot"></i>右手<small>开</small></button></div><div class="transport-buttons"><button class="icon-button restart-button" id="restart-button" aria-label="从头开始" title="从头开始"><svg><use href="#i-restart"/></svg></button><button class="skip-button" id="back-button" aria-label="后退 5 秒" title="后退 5 秒"><svg><use href="#i-back"/></svg><span>5s</span></button><button class="play-button" id="play-button" aria-label="播放" disabled><svg id="play-icon"><use href="#i-play"/></svg><span id="play-text" class="sr-only">播放</span></button><button class="skip-button" id="forward-button" aria-label="前进 5 秒" title="前进 5 秒"><svg><use href="#i-forward"/></svg><span>5s</span></button><button class="icon-button loop-toggle" id="loop-button" aria-label="开启片段循环" aria-pressed="false" title="片段循环"><svg><use href="#i-loop"/></svg></button></div><div class="volume-control"><svg aria-hidden="true"><use href="#i-volume"/></svg><input type="range" id="volume" min="0" max="1" step="0.01" value="0.75" aria-label="音量"></div></div>
+        <div class="practice-controls"><div class="speed-control"><div class="control-label">播放速度 <output id="speed-label">1.00×</output></div><div class="speed-input"><button id="speed-down" class="small-step" aria-label="降低速度">−</button><input id="speed" type="range" min="0.25" max="1.5" value="1" step="0.05" aria-label="播放速度"><button id="speed-up" class="small-step" aria-label="提高速度">＋</button><output id="bpm-label">56 BPM</output></div></div><div class="transpose-control"><div class="control-label">移调 <button id="transpose-reset" class="text-button" title="恢复原调">恢复原调</button></div><div class="transpose-input"><button id="transpose-down" class="small-step" aria-label="降低一个半音">−</button><output id="transpose-label">D 大调</output><button id="transpose-up" class="small-step" aria-label="升高一个半音">＋</button><span id="transpose-amount">原调</span></div></div><button class="loop-settings-button" id="loop-settings-button"><svg><use href="#i-loop"/></svg><span><span class="control-label">片段循环</span><strong id="loop-summary">选择练习片段</strong></span><svg class="chevron"><use href="#i-chevron"/></svg></button></div>
+      </section>
+      <footer class="practice-footer"><span id="session-status"><span class="status-dot"></span>准备好，按下播放就开始</span><span class="keyboard-shortcut"><kbd>space</kbd> 播放 / 暂停 <span>·</span> <kbd>←</kbd> <kbd>→</kbd> 前后跳转</span><span class="footer-wordmark">MADE FOR YOUR OWN PACE</span></footer>
+    </main>
+  </div>
+  <input type="file" id="midi-file" accept=".mid,.midi,audio/midi,audio/x-midi" hidden>
+  <dialog id="loop-dialog" class="settings-dialog"><div class="dialog-heading"><div><span class="eyebrow">A LITTLE AT A TIME</span><h2>这一段，再来一次</h2></div><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><p class="dialog-intro">先把一小段弹熟，再慢慢连成整首。</p><div class="loop-bar-inputs"><label>从第几小节<input id="loop-start-bar" type="number" min="1" value="1" inputmode="numeric"></label><span>—</span><label>到第几小节（含）<input id="loop-end-bar" type="number" min="1" value="4" inputmode="numeric"></label></div><div class="loop-exact"><button id="set-a" class="outline-button">当前位置设为 A</button><button id="set-b" class="outline-button">当前位置设为 B</button></div><p class="loop-time" id="loop-time">A 0:00 — B 0:17</p><div class="dialog-actions"><button id="clear-loop" class="outline-button">关闭循环</button><button id="apply-loop" class="primary-button">开始循环练习</button></div></dialog>
+  <dialog id="settings-dialog" class="settings-dialog"><div class="dialog-heading"><div><span class="eyebrow">MAKE IT YOURS</span><h2>按你的节奏</h2></div><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><label class="setting-row"><span>在音符上显示音名<small>C、D、E… 帮助找到对应的键</small></span><input id="note-labels" type="checkbox" checked></label><label class="setting-row"><span>从头播放时预备 3 秒<small>留一点时间，把手放到琴键上</small></span><input id="count-in" type="checkbox" checked></label><label class="setting-row"><span>提前看多少秒<small>窗口越长，看到的后续音符越多</small></span><select id="lookahead"><option value="6">6 秒</option><option value="9">9 秒</option><option value="12" selected>12 秒</option><option value="16">16 秒</option></select></label><label class="setting-row"><span>左右手分配<small id="hand-method-note">内置曲目使用原钢琴谱的左右手声部</small></span><select id="hand-method"><option value="auto">跟随声部</option><option value="pitch">按音高分手</option></select></label><label class="setting-row" id="split-row" hidden><span>左手与右手的分界<small>低于这个音归左手</small></span><select id="split-note"><option value="48">C3</option><option value="55">G3</option><option value="60" selected>C4 · 中央 C</option><option value="65">F4</option><option value="72">C5</option></select></label><p class="dialog-footnote">设置保存在这台设备上。导入的 MIDI 只在浏览器里读取。</p></dialog>
+  <dialog id="help-dialog" class="settings-dialog help-dialog"><div class="dialog-heading"><div><span class="eyebrow">WELCOME TO MEEDEE</span><h2>一首曲子，慢慢学会</h2></div><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div class="help-items"><p><b>01</b><span><strong>看音符，跟着弹</strong>把 iPad 横放在琴架上。音符碰到底部亮线时，弹下对应的键。绿色是左手，杏色是右手。</span></p><p><b>02</b><span><strong>把速度降下来</strong>先试 0.50×，分别练习两只手；点「左手 / 右手」可关闭一侧的声音，音符会变淡。</span></p><p><b>03</b><span><strong>只练一小段</strong>打开片段循环，选小节，或把当前位置设成 A 和 B。拖动进度条可随时跳转。</span></p><p><b>04</b><span><strong>换一个更顺手的调</strong>点移调的 ＋ / −，声音、下落音符和键盘提示会一起变化，播放速度不变。</span></p><p><b>05</b><span><strong>带上你喜欢的版本</strong>从曲库导入自己的 .mid / .midi 文件。没有分手声部的文件，可以在设置里按音高分色。</span></p></div><div class="credits"><p>内置《Canon in D》：57 小节完整钢琴编曲，Noctave 版，基于 Michael Fischer v. Mollard / Mutopia Project，<a href="https://noctavepiano.com/en/sheet-music/pachelbel-canon/" target="_blank" rel="noreferrer">CC BY 4.0</a>。由该版 MusicXML 转成双声部 MIDI；你也可以导入自己喜欢的其他钢琴改编版本。</p><p>钢琴采样：Salamander Grand Piano，Alexander Holm，<a href="https://creativecommons.org/licenses/by/3.0/" target="_blank" rel="noreferrer">CC BY 3.0</a>。MIDI 解析：@tonejs/midi，MIT。</p></div></dialog>
+  <dialog id="library-dialog" class="settings-dialog"><div class="dialog-heading"><div><span class="eyebrow">YOUR COLLECTION</span><h2>我的曲库</h2></div><button class="icon-button" data-close aria-label="关闭"><svg><use href="#i-close"/></svg></button></div><div id="mobile-song-list" class="song-list"></div><button class="import-button" data-import><svg><use href="#i-import"/></svg>导入 MIDI<span>＋</span></button></dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body>
+</html>

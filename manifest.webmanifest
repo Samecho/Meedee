@@ -1,0 +1,12 @@
+{
+  "name": "Meedee 钢琴练习室",
+  "short_name": "Meedee",
+  "description": "按自己的节奏，慢慢学会一首曲子。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#101717",
+  "theme_color": "#111a1a",
+  "lang": "zh-CN",
+  "icons": [{ "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}
